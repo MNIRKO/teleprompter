@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { readFileAsText } from '../../../utils/fileOperations';
 
 interface UseFileOperationsProps {
   content: string;
@@ -21,18 +22,17 @@ export const useFileOperations = ({ content, onContentChange }: UseFileOperation
   const handleImport = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.txt';
-    input.onchange = (e) => {
+    input.accept = '.txt,.json,.csv,.pdf';
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target?.result;
-          if (typeof text === 'string') {
-            onContentChange(text);
-          }
-        };
-        reader.readAsText(file);
+        const text = await readFileAsText(file);
+        try {
+          const data = JSON.parse(text);
+          onContentChange(typeof data.content === 'string' ? data.content : text);
+        } catch {
+          onContentChange(text);
+        }
       }
     };
     input.click();

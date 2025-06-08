@@ -1,4 +1,28 @@
-export const readFileAsText = (file: File): Promise<string> => {
+import type { getDocument as GetDocumentType } from 'pdfjs-dist';
+
+export const readFileAsText = async (file: File): Promise<string> => {
+  if (
+    file.type === 'application/pdf' ||
+    file.name.toLowerCase().endsWith('.pdf')
+  ) {
+    const pdfjs: { getDocument: typeof GetDocumentType; GlobalWorkerOptions: any } =
+      await import('pdfjs-dist/legacy/build/pdf');
+    const workerSrc = new URL(
+      'pdfjs-dist/legacy/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).toString();
+    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+    const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text +=
+        content.items.map((item: any) => (item as any).str).join(' ') + '\n';
+    }
+    return text.trim();
+  }
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);

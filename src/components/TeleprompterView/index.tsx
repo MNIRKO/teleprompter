@@ -64,6 +64,8 @@ export default function TeleprompterView() {
           isScrolling={isScrolling}
           speed={settings.speed}
           mirrorText={settings.mirrorText}
+          editable
+          onChange={setContent}
           className="h-[calc(100vh-12rem)] sm:h-[calc(100vh-8rem)]"
         />
       </div>

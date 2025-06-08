@@ -12,7 +12,7 @@ export function useFileImport() {
     try {
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = '.txt,.json';
+      input.accept = '.txt,.json,.csv,.pdf';
       
       const file = await new Promise<File>((resolve) => {
         input.onchange = (e) => {
