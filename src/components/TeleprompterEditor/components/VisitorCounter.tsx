@@ -5,10 +5,20 @@ export default function VisitorCounter() {
   const [visitorCount, setVisitorCount] = useState<number>(0);
 
   useEffect(() => {
-    // Simulate visitor count with a random number between 100-1000
-    // In a real app, this would come from an analytics service
-    const randomVisitors = Math.floor(Math.random() * 900) + 100;
-    setVisitorCount(randomVisitors);
+    // Fetch visitor count from a simple analytics service
+    async function fetchCount() {
+      try {
+        const res = await fetch(
+          'https://api.countapi.xyz/hit/teleprompter.example/visits'
+        );
+        const data = await res.json();
+        setVisitorCount(data.value);
+      } catch (error) {
+        console.error('Failed to fetch visitor count', error);
+      }
+    }
+
+    fetchCount();
   }, []);
 
   return (
