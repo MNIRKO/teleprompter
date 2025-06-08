@@ -8,14 +8,18 @@ interface TextDisplayProps {
   speed: number;
   mirrorText: boolean;
   countdown: number;
+  editable?: boolean;
+  onChange?: (text: string) => void;
 }
 
-const TextDisplay = forwardRef<HTMLDivElement, TextDisplayProps>(({
+const TextDisplay = forwardRef<HTMLDivElement, TextDisplayProps>(({ 
   content,
   fontSize,
   isScrolling,
   mirrorText,
   countdown,
+  editable = false,
+  onChange,
 }, ref) => {
   return (
     <div className="relative flex-1">
@@ -36,6 +40,9 @@ const TextDisplay = forwardRef<HTMLDivElement, TextDisplayProps>(({
         className="h-[80vh] overflow-y-auto teleprompter-scrollbar bg-black/80
                    rounded-xl shadow-2xl p-8 text-white"
         dir="rtl"
+        contentEditable={editable}
+        suppressContentEditableWarning={true}
+        onInput={editable ? (e => onChange?.((e.target as HTMLElement).innerText)) : undefined}
       >
         {content || 'הכנס טקסט להצגה...'}
       </div>

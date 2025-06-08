@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { readFileAsText } from '../../../utils/fileOperations';
 
 interface UseFileOperationsProps {
   content: string;
@@ -33,16 +34,21 @@ export function useFileOperations({ content, onContentChange }: UseFileOperation
       setIsLoading(true);
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = '.txt';
-      
+      input.accept = '.txt,.json,.csv,.pdf';
+
       input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (file) {
-          const text = await file.text();
-          onContentChange(text);
+          const text = await readFileAsText(file);
+          try {
+            const data = JSON.parse(text);
+            onContentChange(typeof data.content === 'string' ? data.content : text);
+          } catch {
+            onContentChange(text);
+          }
         }
       };
-      
+
       input.click();
     } catch (err) {
       setError('שגיאה בייבוא הקובץ');
