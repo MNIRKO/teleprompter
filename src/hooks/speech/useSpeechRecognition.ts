@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { createSpeechRecognition } from './utils/createSpeechRecognition';
 
 interface UseSpeechRecognitionProps {
@@ -10,9 +10,19 @@ export function useSpeechRecognition({ onResult, language = 'he-IL' }: UseSpeech
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastTranscriptRef = useRef<string>('');
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   const startListening = useCallback(() => {
     const recognition = createSpeechRecognition({ language });
+    recognitionRef.current = recognition;
     
     if (!recognition) {
       setError('הדפדפן שלך לא תומך בזיהוי קול');
@@ -43,6 +53,7 @@ export function useSpeechRecognition({ onResult, language = 'he-IL' }: UseSpeech
     recognition.onend = () => {
       setIsListening(false);
       lastTranscriptRef.current = '';
+      recognitionRef.current = null;
     };
 
     try {
@@ -56,6 +67,9 @@ export function useSpeechRecognition({ onResult, language = 'he-IL' }: UseSpeech
   }, [language, onResult]);
 
   const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
     setIsListening(false);
     lastTranscriptRef.current = '';
   }, []);
